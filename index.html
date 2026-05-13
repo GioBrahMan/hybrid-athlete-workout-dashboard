@@ -596,6 +596,7 @@
             </div>
             <div class="progress-ring" id="progressRing"><span id="progressText">0%</span></div>
           </div>
+          <p class="readme">Hit the cardio target, complete the lift.</p>
         </div>
       </aside>
     </section>
@@ -900,9 +901,8 @@ I will do 3 sets per exercise for the lifting portion."></textarea>
             weekday: "long"
         }),
         cardio: document.getElementById("cardioInput").value,
-        lift: document.getElementById("liftInput").value,
-        notes: document.getElementById("notesInput").value.trim()
-      };
+        lift: document.getElementById("liftInput").value
+        };
 
       logs.push(newLog);
       saveLogs();
