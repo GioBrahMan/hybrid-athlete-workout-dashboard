@@ -602,7 +602,7 @@
             </div>
             <div class="progress-ring" id="progressRing"><span id="progressText">0%</span></div>
           </div>
-          <p class="readme">Hit the cardio OR sprint bursts target, complete the lift, then leave one useful note. Small logs compound into a serious physique.</p>
+          <p class="readme">Hit the cardio target, complete the lift.</p>
         </div>
       </aside>
     </section>
@@ -613,8 +613,8 @@
         <p class="value" id="totalLogs">0</p>
       </div>
       <div class="stat-card">
-        <p class="label">Cardio Minutes / Total Sprints</p>
-        <p class="value" id="conditioningStat">0 / 0</p>
+        <p class="label">Total Cardio Minutes </p>
+        <p class="value" id="conditioningStat">0</p>
       </div>
       <div class="stat-card">
         <p class="label">Lift Completion</p>
@@ -666,16 +666,6 @@
                 />
                 </label>
 
-                <label>
-                Sprint Bursts
-                <input
-                    type="number"
-                    id="sprintInput"
-                    min="0"
-                    max="50"
-                    placeholder="Example: 15"
-                />
-                </label>
               <label>
                 Lift Status
                 <select id="liftInput" required>
@@ -702,8 +692,6 @@
 
 I will aim to do my workout early morning, I will do so by waking up early. 
 
-I will do 15 sprint bursts on sprint days.
-
 I will do 20 minutes for cardio days.
 
 I will do 3 sets per exercise for the lifting portion."></textarea>
@@ -729,9 +717,9 @@ I will do 3 sets per exercise for the lifting portion."></textarea>
     const workoutPlan = [
       {
         day: "Monday",
-        title: "Sprinting + Biceps",
-        cardio: "Sprint Intervals",
-        target: "15–25 Sprints",
+        title: "Steady Cardio + Biceps",
+        cardio: "Steady Jog",
+        target: "20 Minutes",
         exercises: ["DB Curls", "DB Hammer Curls", "DB Cross Over Curls"]
       },
       {
@@ -743,10 +731,10 @@ I will do 3 sets per exercise for the lifting portion."></textarea>
       },
       {
         day: "Wednesday",
-        title: "Sprinting + Back",
-        cardio: "Sprint intervals",
-        target: "15-25 Sprints",
-        exercises: ["DB Bent Over Rows", "DB Floor Pullover", "DB Superman"]
+        title: "Steady Jog + Back",
+        cardio: "Steady Jog",
+        target: "20 Minutes",
+        exercises: ["DB Bent Over Rows", "DB Floor Pullover", "Parallel Bar Chin Ups"]
       },
       {
         day: "Thursday",
@@ -757,9 +745,9 @@ I will do 3 sets per exercise for the lifting portion."></textarea>
       },
       {
         day: "Friday",
-        title: "Sprinting + Triceps",
-        cardio: "Sprint Intervals",
-        target: "15-25 Sprints",
+        title: "Steady Cardio + Triceps",
+        cardio: "Steady Jog",
+        target: "20 Minutes",
         exercises: ["DB Overhead Press", "DB Kickbacks", "DB Tricep Press"]
       },
       {
@@ -861,11 +849,9 @@ I will do 3 sets per exercise for the lifting portion."></textarea>
       const totalLogs = logs.length;
 
        const totalCardio = logs
-        .filter(log => !log.sprints)
         .reduce((sum, log) => sum + Number(log.cardio || 0), 0);
 
-       const totalSprints = logs
-        .reduce((sum, log) => sum + Number(log.sprints || 0), 0);
+       
       
       const completed = logs.filter(log => log.lift === "Completed Lift").length;
       const liftRate = totalLogs ? Math.round((completed / totalLogs) * 100) : 0;
@@ -873,7 +859,7 @@ I will do 3 sets per exercise for the lifting portion."></textarea>
 
       document.getElementById("totalLogs").textContent = totalLogs;
       document.getElementById("conditioningStat").textContent =
-        `${totalCardio} / ${totalSprints}`;
+        totalCardio;
       document.getElementById("liftRate").textContent = `${liftRate}%`;
       document.getElementById("streakCount").textContent = streak;
 
@@ -901,9 +887,8 @@ I will do 3 sets per exercise for the lifting portion."></textarea>
           card.innerHTML = `
             <strong>${log.day} • ${log.date}</strong>
             <p>
-                Cardio: ${log.cardio || 0} min /
-                Sprints: ${log.sprints || 0}
-                </p>
+                Cardio: ${log.cardio || 0} minutes
+            </p>
             <p>Lift: ${log.lift}</p>
             ${log.notes ? `<p>Note: ${log.notes}</p>` : ""}
           `;
@@ -922,7 +907,6 @@ I will do 3 sets per exercise for the lifting portion."></textarea>
             weekday: "long"
         }),
         cardio: document.getElementById("cardioInput").value,
-        sprints: document.getElementById("sprintInput").value,
         lift: document.getElementById("liftInput").value,
         notes: document.getElementById("notesInput").value.trim()
       };
