@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hybrid Workout Dashboard</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #050509;
+      --card: rgba(18, 18, 28, 0.78);
+      --card-strong: rgba(25, 25, 39, 0.95);
+      --border: rgba(255, 255, 255, 0.1);
+      --border-strong: rgba(255, 255, 255, 0.22);
+      --text: #f8fafc;
+      --muted: #a1a1aa;
+      --muted-2: #71717a;
+      --white: #ffffff;
+      --green: #9cffc7;
+      --blue: #93c5fd;
+      --purple: #c4b5fd;
+      --orange: #fed7aa;
+      --danger: #fca5a5;
+      --shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+      --radius-xl: 30px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(147, 197, 253, 0.16), transparent 34%),
+        radial-gradient(circle at 80% 20%, rgba(196, 181, 253, 0.16), transparent 30%),
+        radial-gradient(circle at 50% 90%, rgba(156, 255, 199, 0.1), transparent 28%),
+        var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image: linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: linear-gradient(to bottom, black, transparent 80%);
+    }
+
+    h1, h2, h3, p {
+      margin-top: 0;
+    }
+
+    button, input, select, textarea {
+      font: inherit;
+    }
+
+    .app {
+      width: min(1220px, 92%);
+      margin: 0 auto;
+      padding: 28px 0 54px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 34px;
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.045);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+    }
+
+    .logo {
+      width: 38px;
+      height: 38px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      color: #050509;
+      background: linear-gradient(135deg, #ffffff, #9cffc7);
+      box-shadow: 0 0 34px rgba(156, 255, 199, 0.34);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .nav a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.92rem;
+      font-weight: 700;
+      padding: 10px 13px;
+      border-radius: 999px;
+      transition: 0.2s ease;
+    }
+
+    .nav a:hover,
+    .nav a.active {
+      color: var(--white);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.18fr 0.82fr;
+      gap: 22px;
+      margin-bottom: 22px;
+    }
+
+    .hero-main,
+    .today-card,
+    .panel,
+    .stat-card,
+    .day-card,
+    .log-card {
+      border: 1px solid var(--border);
+      background: var(--card);
+      backdrop-filter: blur(22px);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-main {
+      min-height: 350px;
+      border-radius: var(--radius-xl);
+      padding: clamp(28px, 5vw, 52px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-main::after {
+      content: "";
+      position: absolute;
+      width: 280px;
+      height: 280px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, rgba(156,255,199,0.22), rgba(147,197,253,0.18));
+      filter: blur(6px);
+      right: -110px;
+      top: -90px;
+    }
+
+    .eyebrow {
+      color: var(--green);
+      text-transform: uppercase;
+      letter-spacing: 0.22em;
+      font-size: 0.72rem;
+      font-weight: 900;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: clamp(2.6rem, 7vw, 5.8rem);
+      line-height: 0.9;
+      letter-spacing: -0.08em;
+      margin-bottom: 20px;
+      max-width: 760px;
+    }
+
+    .subtitle {
+      color: #d4d4d8;
+      font-size: clamp(1rem, 2vw, 1.18rem);
+      line-height: 1.7;
+      max-width: 690px;
+      margin-bottom: 28px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 999px;
+      padding: 14px 18px;
+      cursor: pointer;
+      font-weight: 900;
+      transition: 0.2s ease;
+    }
+
+    .btn-primary {
+      background: var(--white);
+      color: #050509;
+      box-shadow: 0 14px 40px rgba(255, 255, 255, 0.16);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .hero-side {
+      display: grid;
+      gap: 16px;
+    }
+
+    .today-card {
+      border-radius: var(--radius-xl);
+      padding: 26px;
+      display: grid;
+      gap: 24px;
+      align-content: space-between;
+      min-height: 210px;
+    }
+
+    .today-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 9px 12px;
+      border-radius: 999px;
+      font-weight: 900;
+      font-size: 0.82rem;
+      white-space: nowrap;
+    }
+
+    .today-card h2 {
+      font-size: 2rem;
+      letter-spacing: -0.05em;
+      margin-bottom: 8px;
+    }
+
+    .today-card p {
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 0;
+    }
+
+    .progress-ring {
+      width: 94px;
+      height: 94px;
+      border-radius: 50%;
+      background: conic-gradient(var(--green) var(--progress, 0%), rgba(255,255,255,0.08) 0);
+      display: grid;
+      place-items: center;
+      margin-left: auto;
+      box-shadow: 0 0 36px rgba(156, 255, 199, 0.18);
+    }
+
+    .progress-ring span {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: #101018;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      font-size: 0.95rem;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+
+    .stat-card {
+      border-radius: var(--radius-lg);
+      padding: 20px;
+    }
+
+    .stat-card .label {
+      color: var(--muted);
+      font-size: 0.84rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .stat-card .value {
+      font-size: 2rem;
+      font-weight: 950;
+      letter-spacing: -0.06em;
+      margin-bottom: 0;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 22px;
+      align-items: start;
+    }
+
+    .panel {
+      border-radius: var(--radius-xl);
+      padding: 24px;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .panel-header h2 {
+      font-size: 1.45rem;
+      letter-spacing: -0.04em;
+      margin-bottom: 4px;
+    }
+
+    .panel-header p,
+    .readme {
+      color: var(--muted);
+      margin-bottom: 0;
+      line-height: 1.5;
+      font-size: 0.95rem;
+    }
+
+    .weekly-plan {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+
+    .day-card {
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      transition: 0.22s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .day-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--border-strong);
+    }
+
+    .day-card.active {
+      border-color: rgba(156, 255, 199, 0.55);
+      box-shadow: 0 0 0 1px rgba(156, 255, 199, 0.12), 0 24px 80px rgba(156, 255, 199, 0.08);
+    }
+
+    .day-card.active::before {
+      content: "TODAY";
+      position: absolute;
+      right: 14px;
+      top: 14px;
+      font-size: 0.66rem;
+      letter-spacing: 0.16em;
+      color: #050509;
+      background: var(--green);
+      font-weight: 950;
+      padding: 6px 8px;
+      border-radius: 999px;
+    }
+
+    .day-name {
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      margin-bottom: 8px;
+    }
+
+    .day-card h3 {
+      font-size: 1.25rem;
+      letter-spacing: -0.04em;
+      margin-bottom: 10px;
+      padding-right: 64px;
+    }
+
+    .pill-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .mini-pill {
+      border-radius: 999px;
+      padding: 7px 10px;
+      background: rgba(255, 255, 255, 0.07);
+      color: #d4d4d8;
+      border: 1px solid var(--border);
+      font-size: 0.8rem;
+      font-weight: 800;
+    }
+
+    .exercise-list {
+      margin: 0;
+      padding-left: 18px;
+      color: #d4d4d8;
+      line-height: 1.7;
+    }
+
+    .right-stack {
+      display: grid;
+      gap: 22px;
+    }
+
+    form {
+      display: grid;
+      gap: 14px;
+    }
+
+    label {
+      display: grid;
+      gap: 7px;
+      color: #e4e4e7;
+      font-size: 0.92rem;
+      font-weight: 800;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      background: rgba(5, 5, 9, 0.72);
+      color: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      padding: 13px 14px;
+      outline: none;
+      transition: 0.2s ease;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: rgba(156, 255, 199, 0.7);
+      box-shadow: 0 0 0 4px rgba(156, 255, 199, 0.08);
+    }
+
+    textarea {
+      min-height: 110px;
+      resize: vertical;
+    }
+
+    #personalNotes {
+      min-height: 155px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .logs-list {
+      display: grid;
+      gap: 12px;
+      max-height: 460px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .log-card {
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      background: rgba(12, 12, 19, 0.75);
+    }
+
+    .log-card strong {
+      display: block;
+      margin-bottom: 7px;
+    }
+
+    .log-card p {
+      color: var(--muted);
+      line-height: 1.55;
+      margin-bottom: 6px;
+    }
+
+    .empty-state {
+      color: var(--muted);
+      border: 1px dashed var(--border-strong);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      line-height: 1.6;
+      background: rgba(255,255,255,0.035);
+    }
+
+    .footer-note {
+      margin-top: 22px;
+      color: var(--muted-2);
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 980px) {
+      .hero,
+      .layout,
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .weekly-plan {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .app {
+        width: min(94%, 1220px);
+        padding-top: 16px;
+      }
+
+      .nav {
+        align-items: stretch;
+        border-radius: 24px;
+        flex-direction: column;
+      }
+
+      .nav-links {
+        justify-content: flex-start;
+      }
+
+      .hero-main,
+      .today-card,
+      .panel {
+        border-radius: 24px;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .today-top {
+        flex-direction: column;
+      }
+
+      .progress-ring {
+        margin-left: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <nav class="nav">
+      <div class="brand">
+        <div class="logo">⚡</div>
+        <span>HybridOS</span>
+      </div>
+      <div class="nav-links">
+        <a href="#today" class="active">Today</a>
+        <a href="#plan">Weekly Plan</a>
+        <a href="#log">Log Session</a>
+        <a href="#notes">Notes</a>
+      </div>
+    </nav>
+
+    <section class="hero" id="today">
+      <div class="hero-main">
+        <p class="eyebrow">Hybrid Training Dashboard</p>
+        <h1>Run. Lift. Repeat</h1>
+        <p class="subtitle">
+          Hybrid training designed for consistency, performance, and growth.. 
+        </p>
+        <div class="hero-actions">
+          <a href="#log"><button class="btn btn-primary">Log today's workout</button></a>
+          <a href="#plan"><button class="btn btn-secondary">View weekly split</button></a>
+        </div>
+      </div>
+
+      <aside class="hero-side">
+        <div class="today-card">
+          <div class="today-top">
+            <div>
+              <span class="badge">Today's Workout</span>
+              <h2 id="todayTitle">Loading...</h2>
+              <p id="todayDetails">Your workout will appear here.</p>
+            </div>
+            <div class="progress-ring" id="progressRing"><span id="progressText">0%</span></div>
+          </div>
+          <p class="readme">Hit the cardio OR sprint bursts target, complete the lift, then leave one useful note. Small logs compound into a serious physique.</p>
+        </div>
+      </aside>
+    </section>
+
+    <section class="stats-grid">
+      <div class="stat-card">
+        <p class="label">Total Logs</p>
+        <p class="value" id="totalLogs">0</p>
+      </div>
+      <div class="stat-card">
+        <p class="label">Cardio Minutes / Total Sprints</p>
+        <p class="value" id="conditioningStat">0 / 0</p>
+      </div>
+      <div class="stat-card">
+        <p class="label">Lift Completion</p>
+        <p class="value" id="liftRate">0%</p>
+      </div>
+      <div class="stat-card">
+        <p class="label">Current Streak</p>
+        <p class="value" id="streakCount">0</p>
+      </div>
+    </section>
+
+    <section class="layout">
+      <div class="panel" id="plan">
+        <div class="panel-header">
+          <div>
+            <h2>Weekly Training Split</h2>
+            <p>Simple, repeatable, aggressive enough to build discipline.</p>
+          </div>
+        </div>
+        <div class="weekly-plan" id="weeklyPlan"></div>
+      </div>
+
+      <div class="right-stack">
+        <div class="panel" id="log">
+          <div class="panel-header">
+            <div>
+              <h2>Log Session</h2>
+              <p>Save your workout locally in this browser.</p>
+            </div>
+          </div>
+
+          <form id="workoutForm">
+            <div class="form-grid">
+              <label>
+                Date
+                <input type="date" id="dateInput" required />
+              </label>
+            </div>
+
+            <div class="form-grid">
+              <label>
+                Cardio Minutes
+                <input
+                    type="number"
+                    id="cardioInput"
+                    min="0"
+                    max="180"
+                    placeholder="Example: 25"
+                />
+                </label>
+
+                <label>
+                Sprint Bursts
+                <input
+                    type="number"
+                    id="sprintInput"
+                    min="0"
+                    max="50"
+                    placeholder="Example: 15"
+                />
+                </label>
+              <label>
+                Lift Status
+                <select id="liftInput" required>
+                  <option value="Completed Lift">Completed Lift</option>
+                  <option value="Missed Lift">Missed Lift</option>
+                  <option value="Rest Day">Rest Day</option>
+                </select>
+              </label>
+            </div>
+
+
+            <button class="btn btn-primary" type="submit">Save Workout Log</button>
+          </form>
+        </div>
+
+        <div class="panel" id="notes">
+          <div class="panel-header">
+            <div>
+              <h2>Personal Notes</h2>
+              <p>Your training rules, reminders, and motivation.</p>
+            </div>
+          </div>
+          <textarea id="personalNotes" placeholder="Example:
+
+I will aim to do my workout early morning, I will do so by waking up early. 
+
+I will do 15 sprint bursts on sprint days.
+
+I will do 20 minutes for cardio days.
+
+I will do 3 sets per exercise for the lifting portion."></textarea>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h2>Recent Logs</h2>
+              <p>Your latest saved sessions.</p>
+            </div>
+            <button class="btn btn-secondary" id="clearLogs" type="button">Clear</button>
+          </div>
+          <div class="logs-list" id="logsList"></div>
+        </div>
+      </div>
+    </section>
+
+    <p class="footer-note">HybridOS stores data locally in your browser. No accounts. No excuses.</p>
+  </main>
+
+  <script>
+    const workoutPlan = [
+      {
+        day: "Monday",
+        title: "Sprinting + Biceps",
+        cardio: "Sprint Intervals",
+        target: "15–25 Sprints",
+        exercises: ["DB Curls", "DB Hammer Curls", "DB Cross Over Curls"]
+      },
+      {
+        day: "Tuesday",
+        title: "Steady Cardio + Shoulders",
+        cardio: "Steady Jog",
+        target: "20 Minutes",
+        exercises: ["DB Arnold Press", "DB Front Raises", "DB Bent Over Flyes"]
+      },
+      {
+        day: "Wednesday",
+        title: "Sprinting + Back",
+        cardio: "Sprint intervals",
+        target: "15–25 Sprints",
+        exercises: ["DB Bent Over Rows", "DB Shrugs", "DB Superman"]
+      },
+      {
+        day: "Thursday",
+        title: "Steady Cardio + Legs",
+        cardio: "Steady Jog",
+        target: "20 Minutes",
+        exercises: ["DB Squats", "DB Lunges", "DB RDL"]
+      },
+      {
+        day: "Friday",
+        title: "Sprinting + Triceps",
+        cardio: "Sprint Intervals",
+        target: "15 Sprints",
+        exercises: ["DB Overhead Press", "DB Kickbacks", "DB Tricep Press"]
+      },
+      {
+        day: "Saturday",
+        title: "Steady Cardio + Chest",
+        cardio: "Steady Jog",
+        target: "20 Minutes",
+        exercises: ["DB Floor Press", "DB Chest Raises", "DB Close Grip Press"]
+      },
+      {
+        day: "Sunday",
+        title: "Recovery Walk + Mobility",
+        cardio: "Brisk Walk",
+        target: "20 minutes",
+        exercises: ["20 Minute Rest Day Mobility | Follow Along, With Coaching (EDR Fitness)"]
+      }
+    ];
+
+    const weeklyPlan = document.getElementById("weeklyPlan");
+    const dateInput = document.getElementById("dateInput");
+    const form = document.getElementById("workoutForm");
+    const logsList = document.getElementById("logsList");
+    const clearLogs = document.getElementById("clearLogs");
+    const personalNotes = document.getElementById("personalNotes");
+
+    const today = new Date();
+    const todayName = today.toLocaleDateString("en-US", { weekday: "long" });
+    const todayISO = new Date(
+        today.getTime() - today.getTimezoneOffset() * 60000
+    )
+    .toISOString()
+    .split("T")[0];
+
+    dateInput.value = todayISO;
+
+    let logs = JSON.parse(localStorage.getItem("hybridWorkoutLogs")) || [];
+    personalNotes.value = localStorage.getItem("hybridPersonalNotes") || "";
+
+    function renderPlan() {
+      weeklyPlan.innerHTML = "";
+
+      workoutPlan.forEach((item) => {
+        const card = document.createElement("article");
+        card.className = `day-card ${item.day === todayName ? "active" : ""}`;
+        card.innerHTML = `
+          <p class="day-name">${item.day}</p>
+          <h3>${item.title}</h3>
+          <div class="pill-row">
+            <span class="mini-pill">${item.cardio}</span>
+            <span class="mini-pill">${item.target}</span>
+          </div>
+          <ol class="exercise-list">
+            ${item.exercises.map(exercise => `<li>${exercise}</li>`).join("")}
+          </ol>
+        `;
+        weeklyPlan.appendChild(card);
+      });
+    }
+
+    function renderToday() {
+      const todayWorkout = workoutPlan.find(item => item.day === todayName) || workoutPlan[0];
+      document.getElementById("todayTitle").textContent = todayWorkout.title;
+      document.getElementById("todayDetails").textContent = `${todayWorkout.cardio} • ${todayWorkout.target} • ${todayWorkout.exercises.join(", ")}`;
+    }
+
+    function saveLogs() {
+      localStorage.setItem("hybridWorkoutLogs", JSON.stringify(logs));
+    }
+
+    function calculateStreak() {
+      const uniqueDates = [...new Set(logs.map(log => log.date))].sort().reverse();
+      if (uniqueDates.length === 0) return 0;
+
+      let streak = 0;
+      const cursor = new Date(todayISO + "T00:00:00");
+
+      for (let i = 0; i < uniqueDates.length; i++) {
+        const expected = cursor.toISOString().split("T")[0];
+        if (uniqueDates.includes(expected)) {
+          streak++;
+          cursor.setDate(cursor.getDate() - 1);
+        } else if (i === 0) {
+          cursor.setDate(cursor.getDate() - 1);
+          const yesterday = cursor.toISOString().split("T")[0];
+          if (uniqueDates.includes(yesterday)) {
+            streak++;
+            cursor.setDate(cursor.getDate() - 1);
+          } else {
+            break;
+          }
+        } else {
+          break;
+        }
+      }
+      return streak;
+    }
+
+    function updateStats() {
+      const totalLogs = logs.length;
+
+       const totalCardio = logs
+        .filter(log => !log.sprints)
+        .reduce((sum, log) => sum + Number(log.cardio || 0), 0);
+
+       const totalSprints = logs
+        .reduce((sum, log) => sum + Number(log.sprints || 0), 0);
+      
+      const completed = logs.filter(log => log.lift === "Completed Lift").length;
+      const liftRate = totalLogs ? Math.round((completed / totalLogs) * 100) : 0;
+      const streak = calculateStreak();
+
+      document.getElementById("totalLogs").textContent = totalLogs;
+      document.getElementById("conditioningStat").textContent =
+        `${totalCardio} / ${totalSprints}`;
+      document.getElementById("liftRate").textContent = `${liftRate}%`;
+      document.getElementById("streakCount").textContent = streak;
+
+      const todayLog = logs.find(log => log.date === todayISO);
+      const progress = todayLog ? 100 : Math.min(90, totalLogs * 10);
+      document.getElementById("progressRing").style.setProperty("--progress", `${progress}%`);
+      document.getElementById("progressText").textContent = todayLog ? "Done" : `${progress}%`;
+    }
+
+    function renderLogs() {
+      logsList.innerHTML = "";
+
+      if (logs.length === 0) {
+        logsList.innerHTML = `<div class="empty-state">No workouts logged yet. Save your first session and start building proof.</div>`;
+        updateStats();
+        return;
+      }
+
+      logs
+        .slice()
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
+        .forEach((log) => {
+          const card = document.createElement("article");
+          card.className = "log-card";
+          card.innerHTML = `
+            <strong>${log.day} • ${log.date}</strong>
+            <p>
+                Cardio: ${log.cardio || 0} min /
+                Sprints: ${log.sprints || 0}
+                </p>
+            <p>Lift: ${log.lift}</p>
+            ${log.notes ? `<p>Note: ${log.notes}</p>` : ""}
+          `;
+          logsList.appendChild(card);
+        });
+
+      updateStats();
+    }
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      const newLog = {
+        date: dateInput.value,
+        day: new Date(dateInput.value + "T00:00:00").toLocaleDateString("en-US", {
+            weekday: "long"
+        }),
+        cardio: document.getElementById("cardioInput").value,
+        sprints: document.getElementById("sprintInput").value,
+        lift: document.getElementById("liftInput").value,
+        notes: document.getElementById("notesInput").value.trim()
+      };
+
+      logs.push(newLog);
+      saveLogs();
+      renderLogs();
+      form.reset();
+      dateInput.value = todayISO;
+    });
+
+    clearLogs.addEventListener("click", () => {
+      const confirmed = confirm("Clear all workout logs from this browser?");
+      if (!confirmed) return;
+      logs = [];
+      saveLogs();
+      renderLogs();
+    });
+
+    personalNotes.addEventListener("input", () => {
+      localStorage.setItem("hybridPersonalNotes", personalNotes.value);
+    });
+
+    renderPlan();
+    renderToday();
+    renderLogs();
+  </script>
+</body>
+</html>
